@@ -1,0 +1,1324 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Yuki Korean Learner | 유키 한국어 학습</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&family=Be+Vietnam+Pro:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0f0f1a;
+  --bg2: #1a1a2e;
+  --card: #16213e;
+  --accent: #e94560;
+  --accent2: #0f3460;
+  --text: #eaeaea;
+  --text2: #a0a0b0;
+  --success: #00d9a0;
+  --warning: #ffc107;
+  --diamond: #00d4ff;
+  --coin: #ffd700;
+  --yuki: #c77dff;
+  --border: rgba(255,255,255,0.08);
+  --shadow: 0 8px 32px rgba(0,0,0,0.4);
+  --radius: 16px;
+  --font: 'Be Vietnam Pro', 'Noto Sans KR', sans-serif;
+}
+[data-theme="sakura"] { --bg:#1a0a12; --bg2:#2d1525; --card:#3d1f35; --accent:#ff6b9d; --accent2:#c44569; --yuki:#ff9ec4; }
+[data-theme="matcha"] { --bg:#0a1a0f; --bg2:#152d1a; --card:#1f3d28; --accent:#7cb342; --accent2:#558b2f; --yuki:#aed581; }
+[data-theme="ocean"] { --bg:#0a1520; --bg2:#0d2137; --card:#1a3a5c; --accent:#00bcd4; --accent2:#0097a7; --yuki:#4dd0e1; }
+[data-theme="space"] { --bg:#050510; --bg2:#0a0a1f; --card:#12122a; --accent:#7c4dff; --accent2:#651fff; --yuki:#b388ff; }
+[data-theme="night"] { --bg:#0d0d0d; --bg2:#1a1a1a; --card:#252525; --accent:#ff5722; --accent2:#e64a19; --yuki:#ff8a65; }
+
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family:var(--font); background:var(--bg); color:var(--text); min-height:100vh; overflow-x:hidden; }
+button { font-family:inherit; cursor:pointer; border:none; outline:none; }
+input, select, textarea { font-family:inherit; }
+
+/* Layout */
+.app { display:flex; min-height:100vh; }
+.sidebar { width:260px; background:var(--bg2); border-right:1px solid var(--border); display:flex; flex-direction:column; position:fixed; height:100vh; z-index:100; transition:transform .3s; }
+.sidebar-header { padding:20px; display:flex; align-items:center; gap:12px; border-bottom:1px solid var(--border); }
+.sidebar-header img { width:48px; height:48px; border-radius:50%; object-fit:cover; border:2px solid var(--yuki); }
+.sidebar-header h1 { font-size:1.1rem; font-weight:700; background:linear-gradient(135deg,var(--yuki),var(--accent)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
+.nav { flex:1; padding:12px; overflow-y:auto; }
+.nav-item { display:flex; align-items:center; gap:12px; padding:12px 16px; border-radius:12px; color:var(--text2); margin-bottom:4px; transition:all .2s; font-weight:500; }
+.nav-item:hover, .nav-item.active { background:var(--card); color:var(--text); }
+.nav-item.active { border-left:3px solid var(--accent); }
+.nav-item .icon { font-size:1.3rem; width:28px; text-align:center; }
+.sidebar-footer { padding:16px; border-top:1px solid var(--border); }
+.currency { display:flex; gap:12px; margin-bottom:12px; }
+.currency-item { flex:1; background:var(--card); border-radius:10px; padding:10px; text-align:center; }
+.currency-item .val { font-weight:700; font-size:1.1rem; }
+.currency-item .lbl { font-size:.7rem; color:var(--text2); }
+.streak-box { background:linear-gradient(135deg,var(--accent2),var(--accent)); border-radius:12px; padding:12px; text-align:center; color:#fff; }
+.streak-box .num { font-size:1.8rem; font-weight:900; }
+
+.main { flex:1; margin-left:260px; min-height:100vh; }
+.topbar { background:var(--bg2); border-bottom:1px solid var(--border); padding:12px 24px; display:flex; align-items:center; justify-content:space-between; position:sticky; top:0; z-index:50; }
+.topbar-left { display:flex; align-items:center; gap:16px; }
+.menu-toggle { display:none; background:none; color:var(--text); font-size:1.5rem; }
+.page-title { font-size:1.3rem; font-weight:600; }
+.topbar-right { display:flex; align-items:center; gap:12px; }
+.theme-select { background:var(--card); color:var(--text); border:1px solid var(--border); border-radius:8px; padding:6px 12px; }
+.yuki-bubble { background:var(--card); border-radius:20px 20px 20px 4px; padding:10px 16px; max-width:320px; font-size:.85rem; border:1px solid var(--border); position:relative; }
+.yuki-bubble::before { content:'👓'; margin-right:6px; }
+
+.content { padding:24px; max-width:1200px; margin:0 auto; }
+.page { display:none; animation:fadeIn .3s; }
+.page.active { display:block; }
+@keyframes fadeIn { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:none} }
+
+/* Cards & Grid */
+.grid { display:grid; gap:16px; }
+.grid-2 { grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); }
+.grid-3 { grid-template-columns:repeat(auto-fill,minmax(220px,1fr)); }
+.grid-4 { grid-template-columns:repeat(auto-fill,minmax(180px,1fr)); }
+.card { background:var(--card); border-radius:var(--radius); border:1px solid var(--border); padding:20px; transition:transform .2s,box-shadow .2s; }
+.card:hover { transform:translateY(-2px); box-shadow:var(--shadow); }
+.card-title { font-size:1.1rem; font-weight:600; margin-bottom:8px; }
+.card-sub { color:var(--text2); font-size:.85rem; margin-bottom:12px; }
+
+/* Buttons */
+.btn { display:inline-flex; align-items:center; gap:8px; padding:10px 20px; border-radius:12px; font-weight:600; font-size:.9rem; transition:all .2s; }
+.btn-primary { background:linear-gradient(135deg,var(--accent),var(--accent2)); color:#fff; }
+.btn-primary:hover { filter:brightness(1.1); transform:scale(1.02); }
+.btn-secondary { background:var(--bg2); color:var(--text); border:1px solid var(--border); }
+.btn-secondary:hover { background:var(--card); }
+.btn-success { background:var(--success); color:#000; }
+.btn-sm { padding:6px 12px; font-size:.8rem; border-radius:8px; }
+.btn:disabled { opacity:.5; cursor:not-allowed; }
+
+/* Progress */
+.progress-bar { height:8px; background:var(--bg); border-radius:4px; overflow:hidden; }
+.progress-fill { height:100%; background:linear-gradient(90deg,var(--accent),var(--yuki)); border-radius:4px; transition:width .4s; }
+
+/* Stage Cards */
+.stage-card { cursor:pointer; position:relative; overflow:hidden; }
+.stage-card.locked { opacity:.5; pointer-events:none; }
+.stage-card .lock { position:absolute; top:12px; right:12px; font-size:1.2rem; }
+.stage-card .stage-num { font-size:.75rem; color:var(--yuki); font-weight:700; text-transform:uppercase; letter-spacing:1px; }
+.stage-card .stars { color:var(--coin); font-size:.9rem; }
+
+/* Flashcard */
+.flash-container { perspective:1000px; max-width:400px; margin:0 auto; }
+.flashcard { width:100%; height:280px; position:relative; transform-style:preserve-3d; transition:transform .6s; cursor:pointer; }
+.flashcard.flipped { transform:rotateY(180deg); }
+.flash-face { position:absolute; width:100%; height:100%; backface-visibility:hidden; border-radius:var(--radius); display:flex; flex-direction:column; align-items:center; justify-content:center; padding:24px; background:var(--card); border:1px solid var(--border); }
+.flash-back { transform:rotateY(180deg); background:linear-gradient(135deg,var(--accent2),var(--card)); }
+.flash-hangul { font-size:2.5rem; font-weight:700; margin-bottom:8px; }
+.flash-romaji { font-size:1.1rem; color:var(--yuki); margin-bottom:12px; }
+.flash-mean { font-size:1.3rem; font-weight:600; }
+.flash-emoji { font-size:3rem; margin-bottom:12px; }
+.flash-nav { display:flex; justify-content:center; gap:12px; margin-top:20px; }
+
+/* Dialogue */
+.dialogue-table { width:100%; border-collapse:collapse; }
+.dialogue-table th, .dialogue-table td { padding:10px 12px; text-align:left; border-bottom:1px solid var(--border); font-size:.9rem; }
+.dialogue-table th { background:var(--bg2); color:var(--yuki); font-weight:600; }
+.dialogue-table tr:hover { background:rgba(255,255,255,0.03); }
+.tts-btn { background:none; color:var(--accent); font-size:1.1rem; padding:4px; border-radius:50%; }
+.tts-btn:hover { background:rgba(233,69,96,0.2); }
+
+/* Quiz */
+.quiz-q { font-size:1.15rem; font-weight:500; margin-bottom:20px; line-height:1.5; }
+.quiz-opts { display:flex; flex-direction:column; gap:10px; }
+.quiz-opt { background:var(--bg2); border:2px solid var(--border); border-radius:12px; padding:14px 18px; text-align:left; transition:all .2s; color:var(--text); font-size:.95rem; }
+.quiz-opt:hover { border-color:var(--accent); }
+.quiz-opt.correct { border-color:var(--success); background:rgba(0,217,160,0.15); }
+.quiz-opt.wrong { border-color:var(--accent); background:rgba(233,69,96,0.15); }
+.quiz-feedback { margin-top:16px; padding:14px; border-radius:12px; font-size:.9rem; }
+.quiz-feedback.ok { background:rgba(0,217,160,0.15); border:1px solid var(--success); }
+.quiz-feedback.bad { background:rgba(233,69,96,0.15); border:1px solid var(--accent); }
+.quiz-input { width:100%; background:var(--bg2); border:2px solid var(--border); border-radius:12px; padding:14px; color:var(--text); font-size:1.1rem; margin-bottom:12px; }
+.quiz-input:focus { border-color:var(--accent); outline:none; }
+
+/* Shop */
+.shop-item { text-align:center; }
+.shop-item .item-icon { font-size:2.5rem; margin-bottom:8px; }
+.shop-item .price { color:var(--coin); font-weight:700; margin:8px 0; }
+.shop-item.owned { opacity:.6; }
+.shop-tabs { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:20px; }
+.shop-tab { padding:8px 16px; border-radius:20px; background:var(--bg2); color:var(--text2); font-size:.85rem; border:1px solid var(--border); }
+.shop-tab.active { background:var(--accent); color:#fff; border-color:var(--accent); }
+
+/* Songs */
+.song-card { display:flex; gap:16px; align-items:center; }
+.song-cover { width:80px; height:80px; border-radius:12px; background:linear-gradient(135deg,var(--accent),var(--yuki)); display:flex; align-items:center; justify-content:center; font-size:2rem; flex-shrink:0; }
+.lyric-line { padding:8px 0; border-bottom:1px solid var(--border); }
+.lyric-hangul { font-size:1.05rem; font-weight:500; }
+.lyric-romaji { font-size:.85rem; color:var(--yuki); }
+.lyric-vi { font-size:.85rem; color:var(--text2); }
+
+/* Modal */
+.modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,0.7); z-index:200; display:none; align-items:center; justify-content:center; padding:20px; }
+.modal-overlay.show { display:flex; }
+.modal { background:var(--card); border-radius:var(--radius); max-width:600px; width:100%; max-height:85vh; overflow-y:auto; border:1px solid var(--border); animation:fadeIn .3s; }
+.modal-header { padding:20px; border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:center; }
+.modal-body { padding:20px; }
+.modal-close { background:none; color:var(--text2); font-size:1.5rem; }
+
+/* Yuki Avatar floating */
+.yuki-float { position:fixed; bottom:24px; right:24px; width:90px; height:120px; z-index:90; cursor:pointer; transition:transform .3s; }
+.yuki-float:hover { transform:scale(1.08); }
+.yuki-float img { width:100%; height:100%; object-fit:contain; filter:drop-shadow(0 4px 12px rgba(199,125,255,0.4)); }
+.yuki-speech { position:absolute; bottom:100%; right:0; background:var(--card); border:1px solid var(--border); border-radius:12px; padding:10px 14px; font-size:.8rem; max-width:220px; margin-bottom:8px; display:none; box-shadow:var(--shadow); }
+.yuki-float:hover .yuki-speech { display:block; }
+
+/* Responsive */
+@media (max-width:900px) {
+  .sidebar { transform:translateX(-100%); }
+  .sidebar.open { transform:translateX(0); }
+  .main { margin-left:0; }
+  .menu-toggle { display:block; }
+  .grid-2, .grid-3, .grid-4 { grid-template-columns:1fr; }
+}
+
+/* Hangul highlight */
+.hangul { font-family:'Noto Sans KR',sans-serif; font-weight:500; }
+.badge { display:inline-block; padding:2px 8px; border-radius:6px; font-size:.7rem; font-weight:600; }
+.badge-srs { background:rgba(0,212,255,0.2); color:var(--diamond); }
+.badge-new { background:rgba(233,69,96,0.2); color:var(--accent); }
+
+/* Toast */
+.toast { position:fixed; top:20px; right:20px; background:var(--card); border:1px solid var(--border); border-radius:12px; padding:14px 20px; z-index:300; transform:translateX(120%); transition:transform .3s; box-shadow:var(--shadow); max-width:320px; }
+.toast.show { transform:translateX(0); }
+.toast.success { border-color:var(--success); }
+.toast.error { border-color:var(--accent); }
+</style>
+</head>
+<body>
+<div class="app">
+  <!-- Sidebar -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <img src="yuki.png" alt="Yuki" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><circle cx=%2250%22 cy=%2250%22 r=%2240%22 fill=%22%23c77dff%22/><text x=%2250%22 y=%2258%22 text-anchor=%22middle%22 font-size=%2230%22>👓</text></svg>'">
+      <div>
+        <h1>Yuki Korean</h1>
+        <div style="font-size:.7rem;color:var(--text2)">CEO Giám sát lộ trình</div>
+      </div>
+    </div>
+    <nav class="nav">
+      <a class="nav-item active" data-page="home"><span class="icon">🏠</span> Trang chủ</a>
+      <a class="nav-item" data-page="path"><span class="icon">🗺️</span> Lộ trình 30 Chặng</a>
+      <a class="nav-item" data-page="flashcards"><span class="icon">🃏</span> Flashcards</a>
+      <a class="nav-item" data-page="situations"><span class="icon">💬</span> 20 Tình huống</a>
+      <a class="nav-item" data-page="songs"><span class="icon">🎵</span> Học qua K-Pop</a>
+      <a class="nav-item" data-page="quiz"><span class="icon">📝</span> Kiểm tra & SRS</a>
+      <a class="nav-item" data-page="shop"><span class="icon">🛍️</span> Shop & Theme</a>
+      <a class="nav-item" data-page="profile"><span class="icon">👤</span> Hồ sơ & Thành tựu</a>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="currency">
+        <div class="currency-item"><div class="val" id="coinDisplay" style="color:var(--coin)">0 🪙</div><div class="lbl">Xu</div></div>
+        <div class="currency-item"><div class="val" id="diamondDisplay" style="color:var(--diamond)">0 💎</div><div class="lbl">Kim cương</div></div>
+      </div>
+      <div class="streak-box">
+        <div style="font-size:.75rem;opacity:.9">Chuỗi ngày học</div>
+        <div class="num" id="streakDisplay">0 🔥</div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <div class="main">
+    <header class="topbar">
+      <div class="topbar-left">
+        <button class="menu-toggle" id="menuToggle">☰</button>
+        <div class="page-title" id="pageTitle">Trang chủ</div>
+      </div>
+      <div class="topbar-right">
+        <select class="theme-select" id="themeSelect">
+          <option value="default">🌌 Default</option>
+          <option value="sakura">🌸 Sakura</option>
+          <option value="matcha">🍵 Matcha</option>
+          <option value="ocean">🌊 Ocean</option>
+          <option value="space">🚀 Space</option>
+          <option value="night">🌙 Night</option>
+        </select>
+      </div>
+    </header>
+
+    <div class="content">
+      <!-- HOME -->
+      <section class="page active" id="page-home">
+        <div class="card" style="margin-bottom:24px;background:linear-gradient(135deg,var(--card),var(--accent2));">
+          <div style="display:flex;gap:20px;align-items:center;flex-wrap:wrap;">
+            <img src="yuki.png" alt="Yuki" style="width:120px;height:160px;object-fit:contain;filter:drop-shadow(0 4px 16px rgba(199,125,255,0.5));" onerror="this.style.display='none'">
+            <div style="flex:1;">
+              <h2 style="font-size:1.5rem;margin-bottom:8px;">👓 Yuki đây!</h2>
+              <p id="yukiGreeting" style="color:var(--text2);line-height:1.6;margin-bottom:16px;">"Chào cậu. Tôi là Yuki, CEO kiêm giám sát lộ trình học tiếng Hàn. Đừng nghĩ đến chuyện học hời hợt hay bỏ dở giữa chừng. Làm bài đúng thì có Xu và Kim cương, làm sai thì chuẩn bị nghe tôi 'cà khịa' mặn mòi nhé. Sẵn sàng chưa?"</p>
+              <button class="btn btn-primary" onclick="navigate('path')">Bắt đầu học ngay →</button>
+            </div>
+          </div>
+        </div>
+        <div class="grid grid-3" style="margin-bottom:24px;">
+          <div class="card" style="text-align:center;">
+            <div style="font-size:2rem;">📚</div>
+            <div class="card-title" id="statStages">0/30</div>
+            <div class="card-sub">Chặng đã hoàn thành</div>
+          </div>
+          <div class="card" style="text-align:center;">
+            <div style="font-size:2rem;">📖</div>
+            <div class="card-title" id="statVocab">0</div>
+            <div class="card-sub">Từ vựng đã học</div>
+          </div>
+          <div class="card" style="text-align:center;">
+            <div style="font-size:2rem;">⭐</div>
+            <div class="card-title" id="statScore">0%</div>
+            <div class="card-sub">Điểm trung bình</div>
+          </div>
+        </div>
+        <h3 style="margin-bottom:12px;">📅 Nhiệm vụ hôm nay</h3>
+        <div class="grid grid-2" id="dailyQuests"></div>
+      </section>
+
+      <!-- PATH -->
+      <section class="page" id="page-path">
+        <p style="color:var(--text2);margin-bottom:20px;">30 chặng học từ dễ đến khó. Mỗi chặng: Chữ cái → Từ vựng → Văn hóa → Hội thoại → Kiểm tra.</p>
+        <div class="grid grid-3" id="stagesGrid"></div>
+      </section>
+
+      <!-- FLASHCARDS -->
+      <section class="page" id="page-flashcards">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:12px;">
+          <select id="flashTopic" class="theme-select" style="min-width:200px;"></select>
+          <div>
+            <button class="btn btn-sm btn-secondary" onclick="speakCurrentFlash()">🔊 Phát âm</button>
+            <button class="btn btn-sm btn-primary" onclick="flipFlash()">Lật thẻ</button>
+          </div>
+        </div>
+        <div class="flash-container">
+          <div class="flashcard" id="flashcard" onclick="flipFlash()">
+            <div class="flash-face flash-front">
+              <div class="flash-emoji" id="flashEmoji">👋</div>
+              <div class="flash-hangul hangul" id="flashHangul">안녕하세요</div>
+              <div class="flash-romaji" id="flashRomaji">An-nyeong-ha-se-yo</div>
+            </div>
+            <div class="flash-face flash-back">
+              <div class="flash-mean" id="flashMean">Xin chào</div>
+              <div style="margin-top:12px;font-size:.85rem;color:var(--text2);text-align:center;" id="flashCulture"></div>
+            </div>
+          </div>
+        </div>
+        <div class="flash-nav">
+          <button class="btn btn-secondary" onclick="prevFlash()">← Trước</button>
+          <span id="flashCounter" style="align-self:center;color:var(--text2);">1 / 10</span>
+          <button class="btn btn-secondary" onclick="nextFlash()">Sau →</button>
+        </div>
+        <div style="margin-top:24px;" class="card">
+          <div class="card-title">✍️ Tự viết ví dụ</div>
+          <p class="card-sub">Gõ một câu tiếng Hàn sử dụng từ vựng này. Máy sẽ chấm dựa trên từ khóa.</p>
+          <input type="text" class="quiz-input" id="exampleInput" placeholder="Ví dụ: 안녕하세요! 저는 민수입니다.">
+          <button class="btn btn-primary" onclick="checkExample()">Chấm điểm</button>
+          <div id="exampleFeedback" style="margin-top:12px;"></div>
+        </div>
+      </section>
+
+      <!-- SITUATIONS -->
+      <section class="page" id="page-situations">
+        <p style="color:var(--text2);margin-bottom:16px;">20 tình huống giao tiếp thực tế song ngữ Hàn-Việt từ bộ truyện. Chọn chủ đề:</p>
+        <div class="grid grid-3" id="situationsList"></div>
+      </section>
+
+      <!-- SONGS -->
+      <section class="page" id="page-songs">
+        <p style="color:var(--text2);margin-bottom:16px;">Học tiếng Hàn qua 10 bài hát K-Pop / OST nổi tiếng. Shadowing + bóc tách từ vựng.</p>
+        <div class="grid grid-2" id="songsList"></div>
+      </section>
+
+      <!-- QUIZ -->
+      <section class="page" id="page-quiz">
+        <div id="quizSetup">
+          <h3 style="margin-bottom:12px;">Chọn chế độ kiểm tra</h3>
+          <div class="grid grid-2">
+            <div class="card" style="cursor:pointer;" onclick="startQuiz('stage')">
+              <div class="card-title">📋 Kiểm tra Chặng</div>
+              <div class="card-sub">20–25 câu xáo trộn, có SRS</div>
+            </div>
+            <div class="card" style="cursor:pointer;" onclick="startQuiz('review')">
+              <div class="card-title">🔁 Ôn tập SRS</div>
+              <div class="card-sub">Các câu đã sai / cần ôn lại</div>
+            </div>
+            <div class="card" style="cursor:pointer;" onclick="startQuiz('final')">
+              <div class="card-title">💎 Tổng ôn Khó</div>
+              <div class="card-sub">Đạt ≥70% nhận Kim cương</div>
+            </div>
+            <div class="card" style="cursor:pointer;" onclick="startQuiz('vocab')">
+              <div class="card-title">🃏 Kiểm tra Từ vựng</div>
+              <div class="card-sub">Flashcard quiz nhanh</div>
+            </div>
+          </div>
+        </div>
+        <div id="quizArea" style="display:none;">
+          <div style="display:flex;justify-content:space-between;margin-bottom:16px;">
+            <span id="quizProgress">Câu 1/20</span>
+            <span id="quizScore">Đúng: 0</span>
+          </div>
+          <div class="progress-bar" style="margin-bottom:20px;"><div class="progress-fill" id="quizBar" style="width:0%"></div></div>
+          <div class="card">
+            <div class="quiz-q" id="quizQuestion"></div>
+            <div id="quizOptions" class="quiz-opts"></div>
+            <div id="quizInputArea" style="display:none;">
+              <input type="text" class="quiz-input" id="quizInput" placeholder="Gõ câu trả lời bằng Hangul hoặc Romaji...">
+              <button class="btn btn-primary" onclick="submitTyped()">Gửi đáp án</button>
+            </div>
+            <div id="quizFeedback"></div>
+            <div style="margin-top:16px;display:none;" id="quizNextWrap">
+              <button class="btn btn-primary" id="quizNextBtn" onclick="nextQuestion()">Câu tiếp →</button>
+            </div>
+          </div>
+        </div>
+        <div id="quizResult" style="display:none;"></div>
+      </section>
+
+      <!-- SHOP -->
+      <section class="page" id="page-shop">
+        <div class="shop-tabs" id="shopTabs">
+          <button class="shop-tab active" data-cat="all">Tất cả</button>
+          <button class="shop-tab" data-cat="outfit">👘 Trang phục</button>
+          <button class="shop-tab" data-cat="hair">💇 Tóc & Makeup</button>
+          <button class="shop-tab" data-cat="prop">🗡️ Đạo cụ</button>
+          <button class="shop-tab" data-cat="theme">🎨 Theme</button>
+          <button class="shop-tab" data-cat="streak">🛡️ Bảo vệ Streak</button>
+        </div>
+        <div class="grid grid-4" id="shopGrid"></div>
+      </section>
+
+      <!-- PROFILE -->
+      <section class="page" id="page-profile">
+        <div class="card" style="margin-bottom:20px;">
+          <div style="display:flex;gap:20px;align-items:center;">
+            <img src="yuki.png" style="width:100px;height:130px;object-fit:contain;" onerror="this.style.display='none'">
+            <div>
+              <h2>Học viên</h2>
+              <p style="color:var(--text2);">Streak: <span id="profStreak">0</span> ngày | Cấp độ: <span id="profLevel">1</span></p>
+              <div class="progress-bar" style="margin-top:8px;width:200px;"><div class="progress-fill" id="profXP" style="width:30%"></div></div>
+            </div>
+          </div>
+        </div>
+        <h3 style="margin-bottom:12px;">🏆 Thành tựu</h3>
+        <div class="grid grid-3" id="achievements"></div>
+        <h3 style="margin:24px 0 12px;">📦 Vật phẩm đã sở hữu</h3>
+        <div id="inventory" class="grid grid-4"></div>
+      </section>
+    </div>
+  </div>
+</div>
+
+<!-- Modal for Stage / Situation detail -->
+<div class="modal-overlay" id="modal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 id="modalTitle">Chi tiết</h3>
+      <button class="modal-close" onclick="closeModal()">×</button>
+    </div>
+    <div class="modal-body" id="modalBody"></div>
+  </div>
+</div>
+
+<!-- Floating Yuki -->
+<div class="yuki-float" onclick="yukiSpeak()">
+  <div class="yuki-speech" id="yukiSpeech">Nhấn vào tôi để nghe nhận xét!</div>
+  <img src="yuki.png" alt="Yuki" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 120%22><rect width=%22100%22 height=%22120%22 rx=%2210%22 fill=%22%2316213e%22/><text x=%2250%22 y=%2270%22 text-anchor=%22middle%22 font-size=%2240%22>👓</text></svg>'">
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ==================== DATA ====================
+const STAGES = [
+  {id:1, title:"Chào hỏi & Làm quen", letters:"ㅏ ㅓ ㅗ ㅜ ㅡ ㅣ", topic:"greeting", emoji:"👋", locked:false},
+  {id:2, title:"Gia đình & Xưng hô", letters:"ㄱ ㄴ ㄷ ㄹ ㅁ", topic:"family", emoji:"👨‍👩‍👧‍👦", locked:true},
+  {id:3, title:"Lớp học & Đồ vật", letters:"ㅂ ㅅ ㅇ ㅈ ㅎ", topic:"school", emoji:"📚", locked:true},
+  {id:4, title:"Cảm xúc & Trạng thái", letters:"ㄲ ㄸ ㅃ ㅆ ㅉ", topic:"emotion", emoji:"😊", locked:true},
+  {id:5, title:"Trường học & Địa điểm", letters:"ㅐ ㅔ ㅘ ㅝ", topic:"place", emoji:"🏫", locked:true},
+  {id:6, title:"Patchim & Đồ ăn cơ bản", letters:"Patchim", topic:"food_basic", emoji:"🍚", locked:true},
+  {id:7, title:"Số Thuần Hàn & Đếm", letters:"하나 둘 셋", topic:"number_native", emoji:"🔢", locked:true},
+  {id:8, title:"Số Hán Hàn & Giá cả", letters:"일 이 삼", topic:"number_sino", emoji:"💰", locked:true},
+  {id:9, title:"Quán Cà Phê K-Style", letters:"Cafe", topic:"cafe", emoji:"☕", locked:true},
+  {id:10, title:"Quán Ăn / Nhà hàng", letters:"Restaurant", topic:"restaurant", emoji:"🍲", locked:true},
+  {id:11, title:"Thời gian & Lịch trình", letters:"Time", topic:"time", emoji:"⏰", locked:true},
+  {id:12, title:"Thời tiết & Trang phục", letters:"Weather", topic:"weather", emoji:"🌤️", locked:true},
+  {id:13, title:"Tàu điện ngầm & Xe buýt", letters:"Subway", topic:"transport", emoji:"🚇", locked:true},
+  {id:14, title:"Hỏi đường & Phương hướng", letters:"Direction", topic:"direction", emoji:"🗺️", locked:true},
+  {id:15, title:"Thói quen sinh hoạt", letters:"Daily", topic:"daily", emoji:"🛏️", locked:true},
+  {id:16, title:"Sở thích & Âm nhạc", letters:"Hobby", topic:"hobby", emoji:"🎸", locked:true},
+  {id:17, title:"Bệnh viện & Nhà thuốc", letters:"Health", topic:"health", emoji:"💊", locked:true},
+  {id:18, title:"Nhà cửa & Đồ gia dụng", letters:"House", topic:"house", emoji:"🏠", locked:true},
+  {id:19, title:"Ngoại hình & Tính cách", letters:"Appearance", topic:"appearance", emoji:"🪞", locked:true},
+  {id:20, title:"Hẹn hò & Tình cảm", letters:"Love", topic:"love", emoji:"💕", locked:true},
+  {id:21, title:"K-Pop & K-Drama", letters:"KCulture", topic:"kculture", emoji:"🎤", locked:true},
+  {id:22, title:"Công việc văn phòng", letters:"Office", topic:"office", emoji:"💼", locked:true},
+  {id:23, title:"Du lịch & Khách sạn", letters:"Travel", topic:"travel", emoji:"✈️", locked:true},
+  {id:24, title:"Mỹ phẩm & K-Beauty", letters:"Beauty", topic:"beauty", emoji:"💄", locked:true},
+  {id:25, title:"Kính ngữ vs Nói đẩu", letters:"Honorific", topic:"honorific", emoji:"🙇", locked:true},
+  {id:26, title:"Mạng xã hội & Gen Z", letters:"Slang", topic:"slang", emoji:"📱", locked:true},
+  {id:27, title:"Xử lý sự cố khẩn cấp", letters:"Emergency", topic:"emergency", emoji:"🚨", locked:true},
+  {id:28, title:"Thương lượng & Trả giá", letters:"Bargain", topic:"bargain", emoji:"🛒", locked:true},
+  {id:29, title:"Từ chối lịch sự", letters:"Refuse", topic:"refuse", emoji:"🙅", locked:true},
+  {id:30, title:"Tổng ôn Sinh tồn", letters:"Final", topic:"final", emoji:"💎", locked:true},
+];
+
+// Vocab from KoreanDoc + expanded
+const VOCAB = {
+  greeting: [
+    {h:"안녕하세요", r:"An-nyeong-ha-se-yo", v:"Xin chào", e:"👋", c:"Ghép 안녕 (bình an) + 하세요 (kính ngữ). Cúi chào 15-30° khi gặp lần đầu."},
+    {h:"만나서 반갑습니다", r:"Man-na-seo ban-gap-seum-ni-da", v:"Rất vui được gặp", e:"🤝", c:"Động từ 반갑다 + đuôi kính ngữ -습니다. Trang trọng."},
+    {h:"저는 ... 입니다", r:"Jeo-neun ... im-ni-da", v:"Tôi là ...", e:"👤", c:"저 = tôi khiêm tốn. Dùng với người mới gặp / lớn tuổi."},
+    {h:"이름이 무엇입니까?", r:"I-reum-i mu-eot-im-ni-kka?", v:"Tên bạn là gì?", e:"🏷️", c:"이름 = tên. Đuôi -입니까? là nghi vấn kính ngữ."},
+    {h:"어느 나라 사람입니까?", r:"Eo-neu na-ra sa-ram-im-ni-kka?", v:"Bạn là người nước nào?", e:"🌍", c:"나라 = nước. 사람 = người."},
+    {h:"베트남 사람입니다", r:"Be-teu-nam sa-ram-im-ni-da", v:"Tôi là người Việt Nam", e:"🇻🇳", c:"Phiên âm Hangul của Việt Nam."},
+    {h:"한국어", r:"Han-guk-eo", v:"Tiếng Hàn Quốc", e:"🇰🇷", c:"한국 (Hàn Quốc) + 어 (ngôn ngữ)."},
+    {h:"네", r:"Ne", v:"Vâng / Có", e:"✅", c:"Trả lời khẳng định lịch sự."},
+    {h:"아니요", r:"A-ni-yo", v:"Không", e:"❌", c:"Phủ định lịch sự."},
+    {h:"감사합니다", r:"Gam-sa-ham-ni-da", v:"Cảm ơn", e:"🙏", c:"감사하다 = cảm ơn (Hán Hàn)."},
+  ],
+  cafe: [
+    {h:"아이스 아메리카노", r:"A-i-seu A-me-ri-ka-no", v:"Cà phê Americano đá", e:"🧊☕", c:"Người Hàn gọi tắt '아아' (A-A). Uống đá quanh năm kể cả đông!"},
+    {h:"따뜻한 라떼", r:"Tta-tteut-han ra-tte", v:"Latte nóng", e:"☕", c:"따뜻하다 = ấm/nóng. 라떼 từ latte."},
+    {h:"한 잔 주세요", r:"Han jan ju-se-yo", v:"Cho tôi 1 ly", e:"🥤", c:"잔 = đơn vị đếm ly. 주세요 = xin hãy cho."},
+    {h:"테이크아웃", r:"The-i-kheu-a-ut", v:"Mang đi", e:"🛍️", c:"Từ mượn 'Take out'."},
+    {h:"드시고 가세요", r:"Deu-si-go ga-se-yo", v:"Uống tại đây", e:"🪑", c:"드시다 = kính ngữ của 먹다 (ăn/uống)."},
+    {h:"휘핑크림", r:"Hwi-phing-kheu-rim", v:"Kem tươi", e:"🍦", c:"Whipping cream. Hỏi thêm topping."},
+    {h:"괜찮아요", r:"Gwaen-chan-a-yo", v:"Không sao / Không cần", e:"👍", c:"Dùng từ chối lịch sự."},
+    {h:"진동벨", r:"Jin-dong-bel", v:"Chuông rung", e:"🔔", c:"진동 (rung) + 벨 (bell). Lấy đồ khi rung."},
+    {h:"주문하다", r:"Ju-mun-ha-da", v:"Gọi món / Order", e:"📋", c:"주문 = đặt hàng."},
+    {h:"설탕", r:"Seol-thang", v:"Đường", e:"🍬", c:"Hỏi thêm đường/sữa."},
+  ],
+  restaurant: [
+    {h:"메뉴판", r:"Me-nyu-pan", v:"Thực đơn", e:"📜", c:"Menu + 판 (bảng)."},
+    {h:"비빔밥", r:"Bi-bim-bap", v:"Cơm trộn", e:"🥣", c:"비빔 (trộn) + 밥 (cơm). Món quốc dân."},
+    {h:"불고기", r:"Bul-go-gi", v:"Thịt nướng Bulgogi", e:"🥩", c:"불 (lửa) + 고기 (thịt)."},
+    {h:"주세요", r:"Ju-se-yo", v:"Xin hãy cho", e:"🤲", c:"주다 + -세요. Dùng gọi món."},
+    {h:"물은 셀프입니다", r:"Mul-eun sel-pheu-im-ni-da", v:"Nước tự phục vụ", e:"🥛", c:"셀프 = self. Lấy nước miễn phí."},
+    {h:"맛있게 드세요", r:"Ma-sit-ge deu-se-yo", v:"Chúc ăn ngon miệng", e:"😋", c:"맛있다 = ngon + kính ngữ."},
+    {h:"잘 먹겠습니다", r:"Jal meok-get-seum-ni-da", v:"Tôi sẽ ăn ngon miệng", e:"🙏", c:"Nói trước khi ăn. Thể hiện biết ơn."},
+    {h:"계산해 주세요", r:"Gye-san-hae ju-se-yo", v:"Cho tôi thanh toán", e:"💳", c:"계산 = tính tiền."},
+    {h:"여기요", r:"Yeo-gi-yo", v:"Làm ơn / Ở đây ạ", e:"🛎️", c:"Gọi phục vụ. Hô to hoặc bấm chuông."},
+    {h:"반찬", r:"Ban-chan", v:"Món phụ", e:"🥗", c:"Miễn phí, lấy thêm tự do."},
+  ],
+  transport: [
+    {h:"지하철", r:"Ji-ha-cheol", v:"Tàu điện ngầm", e:"🚇", c:"지하 (lòng đất) + 철 (sắt)."},
+    {h:"역", r:"Yeok", v:"Ga / Trạm", e:"🚉", c:"Đứng sau tên: 서울역."},
+    {h:"갈아타다", r:"Gal-a-tha-da", v:"Đổi tuyến", e:"🔄", c:"갈다 (đổi) + 타다 (lên xe)."},
+    {h:"교통카드", r:"Gyo-thong-kha-deu", v:"Thẻ giao thông", e:"💳", c:"T-Money rất phổ biến."},
+    {h:"편의점", r:"Pyeon-ui-jeom", v:"Cửa hàng tiện lợi", e:"🏪", c:"편의 (tiện nghi) + 점 (tiệm). Mua thẻ tại đây."},
+    {h:"얼마나 걸려요?", r:"Eol-ma-na geol-ryeo-yo?", v:"Mất bao lâu?", e:"⏱️", c:"걸리다 = mất thời gian."},
+    {h:"타세요", r:"Tha-se-yo", v:"Hãy lên (xe)", e:"🚌", c:"타다 + kính ngữ."},
+    {h:"내리다", r:"Nae-ri-da", v:"Xuống (xe)", e:"⬇️", c:"Đối lập với 타다."},
+    {h:"버스", r:"Beo-seu", v:"Xe buýt", e:"🚌", c:"Từ bus."},
+    {h:"조심히 가세요", r:"Jo-sim-hi ga-se-yo", v:"Đi cẩn thận nhé", e:"👋", c:"Lời chào khi người khác đi."},
+  ],
+  health: [
+    {h:"약국", r:"Yak-guk", v:"Nhà thuốc", e:"💊", c:"약 (thuốc) + 국 (cục)."},
+    {h:"머리가 아파요", r:"Meo-ri-ga a-pha-yo", v:"Tôi bị đau đầu", e:"🤕", c:"아프다 = đau."},
+    {h:"열이 나요", r:"Yeol-i na-yo", v:"Tôi bị sốt", e:"🤒", c:"열 = nhiệt/sốt."},
+    {h:"감기약", r:"Gam-gi-yak", v:"Thuốc cảm", e:"🤧", c:"감기 (cảm) + 약 (thuốc)."},
+    {h:"식후 삼십 분", r:"Sik-hu sam-sip bun", v:"30 phút sau ăn", e:"🍚", c:"식후 = sau bữa ăn (Hán Hàn)."},
+    {h:"하루에 세 번", r:"Ha-ru-e se beon", v:"Mỗi ngày 3 lần", e:"📅", c:"하루 = 1 ngày. 번 = lần."},
+    {h:"드세요", r:"Deu-se-yo", v:"Hãy uống/ăn", e:"💊", c:"Kính ngữ của 먹다."},
+    {h:"언제부터", r:"Eon-je-bu-theo", v:"Từ khi nào", e:"⌛", c:"부터 = từ (mốc thời gian)."},
+    {h:"소화제", r:"So-hwa-je", v:"Thuốc tiêu hóa", e:"🤢", c:"소화 = tiêu hóa."},
+    {h:"병원", r:"Byeong-won", v:"Bệnh viện", e:"🏥", c:"병 (bệnh) + 원 (viện)."},
+  ],
+  shopping: [
+    {h:"얼마예요?", r:"Eol-ma-ye-yo?", v:"Giá bao nhiêu?", e:"💰", c:"얼마 = bao nhiêu (giá/số lượng)."},
+    {h:"원", r:"Won", v:"Đồng Won", e:"🪙", c:"Đơn vị tiền Hàn Quốc."},
+    {h:"비싸요", r:"Bi-ssa-yo", v:"Đắt", e:"💸", c:"비싸다 = đắt. Trái 싸다."},
+    {h:"깎아주세요", r:"Kkak-a-ju-se-yo", v:"Giảm giá cho tôi", e:"✂️", c:"깎다 = gọt/giảm. Dùng trả giá."},
+    {h:"카드로 계산", r:"Kha-deu-ro gye-san", v:"Thanh toán bằng thẻ", e:"💳", c:"카드 = card."},
+    {h:"현금", r:"Hyeon-geum", v:"Tiền mặt", e:"💵", c:"현재 (hiện) + 금 (vàng/tiền)."},
+    {h:"옷", r:"Ot", v:"Quần áo", e:"👗", c:"Danh từ chung trang phục."},
+    {h:"사이즈", r:"Sa-i-jeu", v:"Kích cỡ", e:"📏", c:"Size."},
+    {h:"탈의실", r:"Thal-ui-sil", v:"Phòng thử đồ", e:"🚪", c:"탈의 (cởi đồ) + 실 (phòng)."},
+    {h:"영수증", r:"Yeong-su-jeung", v:"Hóa đơn", e:"🧾", c:"Xin hóa đơn khi cần."},
+  ],
+};
+
+// Situations from KoreanDoc (20)
+const SITUATIONS = [
+  {id:1, title:"Chào hỏi & Làm quen", scene:"Lớp học tiếng Hàn tại Seoul", emoji:"🌸", culture:"Cúi chào 15–30° và dùng kính ngữ là quy tắc quan trọng thể hiện tôn trọng.",
+    lines:[
+      {h:"안녕하세요!", r:"An-nyeong-ha-se-yo!", v:"Xin chào!"},
+      {h:"만나서 반갑습니다.", r:"Man-na-seo ban-gap-seum-ni-da.", v:"Rất vui được gặp bạn."},
+      {h:"저는 민수입니다.", r:"Jeo-neun Min-su-im-ni-da.", v:"Tôi là Minsu."},
+      {h:"이름이 무엇입니까?", r:"I-reum-i mu-eot-im-ni-kka?", v:"Tên của bạn là gì?"},
+      {h:"저는 유키입니다.", r:"Jeo-neun Yu-ki-im-ni-da.", v:"Tôi là Yuki."},
+      {h:"어느 나라 사람입니까?", r:"Eo-neu na-ra sa-ram-im-ni-kka?", v:"Bạn là người nước nào?"},
+      {h:"저는 베트남 사람입니다.", r:"Jeo-neun Be-teu-nam sa-ram-im-ni-da.", v:"Tôi là người Việt Nam."},
+      {h:"한국어 공부가 재미있습니다.", r:"Han-guk-eo gong-bu-ga jae-mi-it-seum-ni-da.", v:"Việc học tiếng Hàn rất thú vị."},
+    ]},
+  {id:2, title:"Gọi món tại quán ăn", scene:"Quán ăn truyền thống tại Insadong", emoji:"🍲", culture:"Panchan và nước lọc miễn phí, lấy thêm tự do. Gọi phục vụ bằng '여기요~' hoặc bấm chuông.",
+    lines:[
+      {h:"어서 오세요! 몇 분이세요?", r:"Eo-seo o-se-yo! Myeot bun-i-se-yo?", v:"Xin mời vào! Anh/chị đi mấy người ạ?"},
+      {h:"두 명입니다. 자리가 있습니까?", r:"Du myeong-im-ni-da. Ja-ri-ga it-seum-ni-kka?", v:"Chúng tôi đi 2 người. Còn chỗ không ạ?"},
+      {h:"네, 이쪽으로 앉으세요.", r:"Ne, i-jjok-eu-ro an-jeu-se-yo.", v:"Vâng, xin mời ngồi hướng này."},
+      {h:"메뉴판 좀 주세요.", r:"Me-nyu-pan jom ju-se-yo.", v:"Cho tôi xin thực đơn với ạ."},
+      {h:"비빔밥 하나하고 불고기 하나 주세요.", r:"Bi-bim-bap ha-na-ha-go bul-go-gi ha-na ju-se-yo.", v:"Cho tôi 1 cơm trộn và 1 thịt nướng."},
+      {h:"물은 셀프입니다.", r:"Mul-eun sel-pheu-im-ni-da.", v:"Nước uống tự phục vụ ạ."},
+      {h:"맛있게 드세요!", r:"Ma-sit-ge deu-se-yo!", v:"Chúc quý khách ăn ngon miệng!"},
+      {h:"잘 먹겠습니다!", r:"Jal meok-get-seum-ni-da!", v:"Tôi sẽ ăn thật ngon miệng!"},
+      {h:"여기 계산해 주세요.", r:"Yeo-gi gye-san-hae ju-se-yo.", v:"Cho tôi thanh toán ở đây ạ."},
+    ]},
+  {id:3, title:"Mua sắm ở Myeongdong", scene:"Cửa hàng thời trang tại Myeongdong", emoji:"🛍️", culture:"Thanh toán thẻ phổ biến. Ở gian hàng nhỏ có thể xin giảm giá bằng '이거 좀 깎아주세요'.",
+    lines:[
+      {h:"어서 오세요! 무엇을 찾으세요?", r:"Eo-seo o-se-yo! Mu-eot-eul chat-eu-se-yo?", v:"Xin chào! Bạn đang tìm món gì ạ?"},
+      {h:"이 옷 얼마예요?", r:"I ot eol-ma-ye-yo?", v:"Bộ quần áo này giá bao nhiêu ạ?"},
+      {h:"이 옷은 삼만 원입니다.", r:"I ot-eun sam-man won-im-ni-da.", v:"Bộ này giá 30.000 Won."},
+      {h:"조금 비싸요. 깎아주세요.", r:"Jo-geum bi-ssa-yo. Kkak-a-ju-se-yo.", v:"Hơi đắt một chút. Giảm giá cho tôi nhé."},
+      {h:"그럼 이만 오천 원에 드릴게요.", r:"Geu-reom i-man o-cheon won-e deu-ril-ge-yo.", v:"Vậy tôi lấy bạn 25.000 Won nhé."},
+      {h:"카드로 계산할 수 있어요?", r:"Kha-deu-ro gye-san-hal su it-eo-yo?", v:"Tôi trả bằng thẻ được không?"},
+      {h:"네, 가능합니다. 여기에 서명해주세요.", r:"Ne, ga-neung-ham-ni-da. Yeo-gi-e seo-myeong-hae-ju-se-yo.", v:"Vâng, được ạ. Xin ký tên vào đây."},
+      {h:"감사합니다. 안녕히 계세요.", r:"Gam-sa-ham-ni-da. An-nyeong-hi gye-se-yo.", v:"Cảm ơn. Tôi về nhé."},
+    ]},
+  {id:4, title:"Đi tàu điện ngầm", scene:"Trạm tàu điện ngầm Seoul Station", emoji:"🚇", culture:"Không ngồi ghế vàng dành cho người già, phụ nữ mang thai, người khuyết tật dù trống!",
+    lines:[
+      {h:"실례합니다. 서울역에 어떻게 가요?", r:"Sil-lye-ham-ni-da. Se-oul-yeok-e eo-tteok-he ga-yo?", v:"Xin lỗi, làm sao để đi đến Ga Seoul ạ?"},
+      {h:"지하철 4호선을 타세요.", r:"Ji-ha-cheol sa-ho-seon-eul tha-se-yo.", v:"Hãy đi tàu điện ngầm tuyến số 4."},
+      {h:"어디에서 갈아타야 해요?", r:"Eo-di-e-seo gal-a-tha-ya hae-yo?", v:"Tôi phải đổi tuyến ở đâu?"},
+      {h:"동대문역에서 갈아타세요.", r:"Dong-dae-mun-yeok-e-seo gal-a-tha-se-yo.", v:"Hãy đổi tuyến tại Ga Dongdaemun."},
+      {h:"교통카드는 어디에서 사요?", r:"Gyo-thong-kha-deu-neun eo-di-e-seo sa-yo?", v:"Mua thẻ giao thông ở đâu ạ?"},
+      {h:"편의점에서 살 수 있어요.", r:"Pyeon-ui-jeom-e-seo sal su it-eo-yo.", v:"Bạn có thể mua ở cửa hàng tiện lợi."},
+      {h:"얼마나 걸려요?", r:"Eol-ma-na geol-ryeo-yo?", v:"Mất bao lâu vậy ạ?"},
+      {h:"약 이십 분 정도 걸려요.", r:"Yak i-sip bun jeong-do geol-ryeo-yo.", v:"Mất khoảng 20 phút."},
+      {h:"정말 감사합니다!", r:"Jeong-mal gam-sa-ham-ni-da!", v:"Thực sự cảm ơn bạn rất nhiều!"},
+    ]},
+  {id:5, title:"Gọi cà phê tại quán cafe", scene:"Quán Cafe tại Hongdae", emoji:"☕", culture:"Người Hàn cực kỳ chuộng Cà phê đá Americano (아아). Dù mùa đông vẫn thích uống đá!",
+    lines:[
+      {h:"주문하시겠어요?", r:"Ju-mun-ha-si-get-eo-yo?", v:"Quý khách muốn gọi món chưa ạ?"},
+      {h:"아이스 아메리카노 한 잔 주세요.", r:"A-i-seu A-me-ri-kha-no han jan ju-se-yo.", v:"Cho tôi 1 ly Iced Americano."},
+      {h:"따뜻한 라떼도 한 잔 주세요.", r:"Tta-tteut-han ra-tte-do han jan ju-se-yo.", v:"Cho tôi thêm 1 ly Latte nóng nữa."},
+      {h:"테이크아웃이세요, 드시고 가세요?", r:"The-i-kheu-a-ut-i-se-yo, deu-si-go ga-se-yo?", v:"Bạn mang đi hay uống tại đây ạ?"},
+      {h:"먹고 갈게요.", r:"Meok-go gal-ge-yo.", v:"Tôi sẽ uống tại đây."},
+      {h:"휘핑크림 올려드릴까요?", r:"Hwi-phing-kheu-rim ol-ryeo-deu-ril-kka-yo?", v:"Có thêm kem tươi trên mặt không ạ?"},
+      {h:"아니요, 괜찮아요.", r:"A-ni-yo, gwaen-chan-a-yo.", v:"Không, tôi không cần ạ."},
+      {h:"진동벨이 울리면 찾아가세요.", r:"Jin-dong-bel-i ul-ri-myeon chat-a-ga-se-yo.", v:"Chuông rung thì bạn đến lấy nước nhé."},
+    ]},
+  {id:6, title:"Đi nhà thuốc", scene:"Nhà thuốc gần trạm bus Sinchon", emoji:"💊", culture:"Thuốc cảm nhẹ, tiêu hóa mua được ở nhà thuốc/tiện lợi. Kháng sinh cần đơn bác sĩ.",
+    lines:[
+      {h:"어떻게 오셨어요?", r:"Eo-tteok-he o-syeot-eo-yo?", v:"Bạn cảm thấy không khỏe thế nào ạ?"},
+      {h:"머리가 아프고 열이 나요.", r:"Meo-ri-ga a-pheu-go yeol-i na-yo.", v:"Tôi bị đau đầu và sốt."},
+      {h:"감기약 좀 주세요.", r:"Gam-gi-yak jom ju-se-yo.", v:"Cho tôi mua thuốc cảm với."},
+      {h:"언제부터 아팠어요?", r:"Eon-je-bu-theo a-phat-eo-yo?", v:"Bạn bị đau từ khi nào?"},
+      {h:"어젯밤부터 아팠어요.", r:"Eeo-jet-bam-bu-theo a-phat-eo-yo.", v:"Tôi bị từ tối qua."},
+      {h:"이 약을 식후 삼십 분에 드세요.", r:"I yak-eul sik-hu sam-sip bun-e deu-se-yo.", v:"Hãy uống thuốc này 30 phút sau khi ăn."},
+      {h:"하루에 몇 번 먹어야 해요?", r:"Ha-ru-e myeot beon meok-eo-ya hae-yo?", v:"Một ngày uống mấy lần ạ?"},
+      {h:"하루에 세 번 드세요.", r:"Ha-ru-e se beon deu-se-yo.", v:"Mỗi ngày uống 3 lần nhé."},
+      {h:"얼마예요?", r:"Eol-ma-ye-yo?", v:"Bao nhiêu tiền ạ?"},
+    ]},
+];
+
+// Add more situations stubs for 7-20
+for(let i=7;i<=20;i++){
+  if(!SITUATIONS.find(s=>s.id===i)){
+    SITUATIONS.push({id:i, title:`Tình huống ${i}`, scene:"Seoul", emoji:"📖", culture:"Bối cảnh thực tế đời sống Hàn Quốc.", lines:[
+      {h:"안녕하세요.", r:"An-nyeong-ha-se-yo.", v:"Xin chào."},
+      {h:"감사합니다.", r:"Gam-sa-ham-ni-da.", v:"Cảm ơn."},
+    ]});
+  }
+}
+
+// Songs from Korean.docx
+const SONGS = [
+  {id:1, title:"Still With You", artist:"Jungkook (BTS)", emoji:"💜", lines:[
+    {h:"날 스치는 그대의 옅은 그 목소리", r:"Nal seu-chi-neun geu-dae-ui yeot-eun geu mok-so-ri", v:"Giọng nói nhẹ nhàng của em lướt qua tôi"},
+    {h:"내 이름을 한 번만 더 불러주세요", r:"Nae i-reum-eul han beon-man deo bul-leo-ju-se-yo", v:"Hãy gọi tên tôi thêm một lần nữa"},
+    {h:"얼어버린 노을 아래 멈춰 서있지만", r:"Eol-eo-beo-rin no-eul a-rae meom-chwo seo-it-ji-man", v:"Dù đang dừng dưới ánh hoàng hôn đông cứng"},
+    {h:"그대 향해 한 걸음씩 걸어갈래요, still with you", r:"Geu-dae hyang-hae han geol-eum-ssik geol-eo-gal-lae-yo", v:"Tôi sẽ bước từng bước về phía em, still with you"},
+  ]},
+  {id:2, title:"ONLY", artist:"Lee Hi", emoji:"💖", lines:[
+    {h:"Be my only one", r:"Be my only one", v:"Hãy là người duy nhất của anh"},
+    {h:"이렇게 부르고 싶은 이름 내 곁에", r:"I-reo-ke bul-reu-go sip-eun i-reum nae gyeot-e", v:"Cái tên anh muốn gọi thế này bên cạnh anh"},
+    {h:"손을 잡고서 같이 걸어요", r:"Son-eul jap-go-seo gat-i geol-eo-yo", v:"Nắm tay nhau cùng bước đi"},
+    {h:"비가 오는 밤에도, 외로웠던 낮에도", r:"Bi-ga o-neun bam-e-do, oe-ro-wot-deon nat-e-do", v:"Dù đêm mưa, dù ban ngày cô đơn"},
+  ]},
+  {id:3, title:"I Will Go To You Like The First Snow", artist:"Ailee (Goblin OST)", emoji:"❄️", lines:[
+    {h:"너를 품기 전 알지 못했다", r:"Neo-reul pum-gi jeon al-ji mot-haet-da", v:"Trước khi ôm em, anh chưa từng biết"},
+    {h:"내 머문 세상 이토록 찬란한 것을", r:"Nae meo-mun se-sang i-to-rok chal-lan-han geo-seul", v:"Thế giới anh dừng lại rực rỡ đến thế"},
+    {h:"작은 숨결로 닿은 사람", r:"Ja-geun sum-gyeol-lo da-eun sa-ram", v:"Người chạm vào bằng hơi thở nhỏ bé"},
+    {h:"겁 없이 나를 불러준 사랑", r:"Geop eop-si na-reul bul-leo-jun sa-rang", v:"Tình yêu gọi anh không sợ hãi"},
+  ]},
+  {id:4, title:"SHEESH", artist:"BABYMONSTER", emoji:"🔥", lines:[
+    {h:"Baby, I'ma monster", r:"Baby, I'ma monster", v:"Baby, tôi là quái vật"},
+    {h:"All eyes on me 불을 질러라", r:"All eyes on me bul-eul jil-leo-ra", v:"Mọi ánh mắt đổ dồn, hãy đốt lửa lên"},
+    {h:"Do or die on my life", r:"Do or die on my life", v:"Làm hoặc chết trên đời tôi"},
+    {h:"Got them all going Sheesh", r:"Got them all going Sheesh", v:"Khiến tất cả phải Sheesh"},
+  ]},
+  {id:5, title:"How You Like That", artist:"BLACKPINK", emoji:"🖤", lines:[
+    {h:"보란 듯이 무너졌어", r:"Bo-ran deut-i mu-neo-jyeot-eo", v:"Sụp đổ trước mắt mọi người"},
+    {h:"다시 캄캄한 이곳에 light up the sky", r:"Da-si kam-kam-han i-got-e light up the sky", v:"Lại một lần nữa nơi tối tăm này, thắp sáng bầu trời"},
+    {h:"How you like that?", r:"How you like that?", v:"Cậu thích thế chứ?"},
+    {h:"Look at you, now look at me", r:"Look at you, now look at me", v:"Nhìn cậu kìa, giờ nhìn tôi này"},
+  ]},
+  {id:6, title:"Eyes, Nose, Lips", artist:"Taeyang", emoji:"👁️", lines:[
+    {h:"미안해, 미안해하지 마", r:"Mi-an-hae, mi-an-hae-ha-ji ma", v:"Xin lỗi, đừng xin lỗi"},
+    {h:"너의 눈, 코, 입", r:"Neo-ui nun, ko, ip", v:"Đôi mắt, mũi, môi của em"},
+    {h:"날 만지던 네 손길", r:"Nal man-ji-deon ne son-gil", v:"Bàn tay từng chạm vào tôi"},
+    {h:"이젠 널 추억이라 부를게", r:"I-jen neol chu-eok-i-ra bu-reul-ge", v:"Giờ tôi sẽ gọi em là kỷ niệm"},
+  ]},
+  {id:7, title:"Love Wins All", artist:"IU", emoji:"💗", lines:[
+    {h:"Dearest, darling, my universe", r:"Dearest, darling, my universe", v:"Người thân yêu, vũ trụ của tôi"},
+    {h:"날 데려가 줄래?", r:"Nal de-ryeo-ga jul-lae?", v:"Em sẽ đưa anh đi chứ?"},
+    {h:"Love wins all", r:"Love wins all", v:"Tình yêu chiến thắng tất cả"},
+    {h:"부서지도록 나를 꼭 안아", r:"Bu-seo-ji-do-rok na-reul kkok a-na", v:"Ôm anh chặt đến mức vỡ vụn"},
+  ]},
+  {id:8, title:"Like A Dream", artist:"Various", emoji:"💭", lines:[
+    {h:"내 맘과 같지 않아서", r:"Nae mam-gwa gat-ji an-a-seo", v:"Vì không giống như lòng tôi"},
+    {h:"지금 이 순간 everything With you", r:"Ji-geum i sun-gan everything With you", v:"Khoảnh khắc này everything với em"},
+    {h:"꼭 잡은 두 손을 놓지 마", r:"Kkok jap-eun du son-eul no-chi ma", v:"Đừng buông hai bàn tay đang nắm chặt"},
+  ]},
+];
+
+// Shop items
+const SHOP_ITEMS = [
+  {id:"hanbok1", name:"Hanbok Hồng", cat:"outfit", icon:"👘", price:50, currency:"coin", desc:"Hanbok truyền thống hồng pastel"},
+  {id:"hanbok2", name:"Hanbok Xanh", cat:"outfit", icon:"👗", price:50, currency:"coin", desc:"Hanbok xanh dương thanh lịch"},
+  {id:"suit1", name:"Vest CEO Đen", cat:"outfit", icon:"🤵", price:80, currency:"coin", desc:"Bộ vest như Yuki đang mặc"},
+  {id:"kimono1", name:"Kimono Hoa Anh Đào", cat:"outfit", icon:"🌸", price:5, currency:"diamond", desc:"Kimono Nhật phong cách anime"},
+  {id:"aodai1", name:"Áo Dài Việt", cat:"outfit", icon:"🇻🇳", price:60, currency:"coin", desc:"Áo dài trắng tinh khôi"},
+  {id:"hair1", name:"Tóc Tím Dài", cat:"hair", icon:"💇‍♀️", price:30, currency:"coin", desc:"Tóc tím/hồng đậm như Yuki"},
+  {id:"glasses1", name:"Kính Bạch Kim", cat:"hair", icon:"👓", price:20, currency:"coin", desc:"Kính tròn gọng kim loại bạch kim"},
+  {id:"makeup1", name:"Makeup Lạnh Lùng", cat:"hair", icon:"💄", price:25, currency:"coin", desc:"Phong cách chảnh vô tri"},
+  {id:"sword1", name:"Kiếm Anime", cat:"prop", icon:"⚔️", price:40, currency:"coin", desc:"Đạo cụ cầm tay cool ngầu"},
+  {id:"coffee1", name:"Ly Cà Phê Ảo", cat:"prop", icon:"☕", price:15, currency:"coin", desc:"Ly A-A mang theo bên mình"},
+  {id:"tablet1", name:"Tablet CEO", cat:"prop", icon:"📱", price:35, currency:"coin", desc:"Tablet như trong ảnh Yuki"},
+  {id:"theme_sakura", name:"Theme Sakura", cat:"theme", icon:"🌸", price:3, currency:"diamond", desc:"Giao diện hoa anh đào"},
+  {id:"theme_matcha", name:"Theme Matcha", cat:"theme", icon:"🍵", price:3, currency:"diamond", desc:"Giao diện trà xanh"},
+  {id:"theme_ocean", name:"Theme Ocean", cat:"theme", icon:"🌊", price:3, currency:"diamond", desc:"Giao diện đại dương"},
+  {id:"theme_space", name:"Theme Space", cat:"theme", icon:"🚀", price:5, currency:"diamond", desc:"Giao diện vũ trụ"},
+  {id:"streak_protect", name:"Khiên Streak 1 ngày", cat:"streak", icon:"🛡️", price:2, currency:"diamond", desc:"Bảo vệ streak nếu bỏ 1 ngày"},
+  {id:"streak_protect3", name:"Khiên Streak 3 ngày", cat:"streak", icon:"🛡️", price:5, currency:"diamond", desc:"Bảo vệ streak 3 ngày"},
+];
+
+// Gen Z feedbacks
+const FEEDBACK_OK = [
+  "Chuẩn luôn! 10 Xu vào ví! 🪙",
+  "Hừm, tạm được. Yuki chấp nhận.",
+  "Không tệ. Tiếp tục giữ phong độ nhé.",
+  "Đúng rồi đó. Đừng có tự mãn.",
+  "Ok la! Cà khịa nhẹ thôi, làm tốt đấy.",
+  "Xuất sắc! Kim cương đang chờ cậu ở tổng ôn đó.",
+];
+const FEEDBACK_BAD = [
+  "Sai rồi kìa! Chép phạt 3 lần đi.",
+  "Ơ kìa, học gì mà đã quên rồi?",
+  "Yuki thất vọng nhẹ... làm lại đi.",
+  "Không được đâu. Nhớ kỹ hơn chút được không?",
+  "Haha sai rồi. Đừng để tôi phải nhắc lại nhé.",
+  "Cà khịa: Câu này dễ mà cũng trượt à?",
+];
+
+// ==================== STATE ====================
+let state = {
+  coins: 100,
+  diamonds: 5,
+  streak: 1,
+  lastCheckin: null,
+  completedStages: [],
+  ownedItems: [],
+  reviewQueue: [], // {q, type, stage, times}
+  stats: {vocabLearned:0, totalCorrect:0, totalAnswered:0},
+  currentTheme: "default",
+  level: 1,
+  xp: 0,
+};
+
+function loadState() {
+  try {
+    const s = localStorage.getItem("yukiKoreanState");
+    if (s) state = {...state, ...JSON.parse(s)};
+  } catch(e) {}
+  // Unlock stages based on completed
+  STAGES.forEach((st,i) => {
+    if (i===0 || state.completedStages.includes(st.id-1) || state.completedStages.includes(st.id)) st.locked = false;
+  });
+}
+function saveState() {
+  localStorage.setItem("yukiKoreanState", JSON.stringify(state));
+  updateUI();
+}
+
+// ==================== UI HELPERS ====================
+function $(sel) { return document.querySelector(sel); }
+function $$(sel) { return document.querySelectorAll(sel); }
+
+function toast(msg, type="success") {
+  const t = $("#toast");
+  t.textContent = msg;
+  t.className = "toast show " + type;
+  setTimeout(() => t.classList.remove("show"), 3000);
+}
+
+function navigate(page) {
+  $$(".page").forEach(p => p.classList.remove("active"));
+  $$(".nav-item").forEach(n => n.classList.remove("active"));
+  const pg = $("#page-" + page);
+  if (pg) pg.classList.add("active");
+  const nav = $(`.nav-item[data-page="${page}"]`);
+  if (nav) nav.classList.add("active");
+  const titles = {home:"Trang chủ", path:"Lộ trình 30 Chặng", flashcards:"Flashcards", situations:"20 Tình huống", songs:"Học qua K-Pop", quiz:"Kiểm tra & SRS", shop:"Shop & Theme", profile:"Hồ sơ & Thành tựu"};
+  $("#pageTitle").textContent = titles[page] || page;
+  if (page === "path") renderStages();
+  if (page === "flashcards") initFlashcards();
+  if (page === "situations") renderSituations();
+  if (page === "songs") renderSongs();
+  if (page === "shop") renderShop();
+  if (page === "profile") renderProfile();
+  if (page === "home") renderHome();
+  $("#sidebar").classList.remove("open");
+}
+
+function updateUI() {
+  $("#coinDisplay").textContent = state.coins + " 🪙";
+  $("#diamondDisplay").textContent = state.diamonds + " 💎";
+  $("#streakDisplay").textContent = state.streak + " 🔥";
+  $("#statStages").textContent = state.completedStages.length + "/30";
+  $("#statVocab").textContent = state.stats.vocabLearned;
+  const avg = state.stats.totalAnswered ? Math.round(state.stats.totalCorrect / state.stats.totalAnswered * 100) : 0;
+  $("#statScore").textContent = avg + "%";
+}
+
+function speak(text, lang="ko-KR") {
+  if (!window.speechSynthesis) { toast("Trình duyệt không hỗ trợ TTS", "error"); return; }
+  window.speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(text);
+  u.lang = lang;
+  u.rate = 0.85;
+  window.speechSynthesis.speak(u);
+}
+
+// ==================== HOME ====================
+function renderHome() {
+  const quests = [
+    {t:"Hoàn thành 1 chặng học", r:"+20 🪙", done: state.completedStages.length > 0},
+    {t:"Học 10 flashcard", r:"+10 🪙", done: false},
+    {t:"Làm quiz đạt ≥70%", r:"+1 💎", done: false},
+    {t:"Điểm danh giữ Streak", r:"+5 🪙", done: state.lastCheckin === new Date().toDateString()},
+  ];
+  $("#dailyQuests").innerHTML = quests.map(q => `
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center;">
+        <div>
+          <div class="card-title" style="font-size:1rem;">${q.done?"✅":"⬜"} ${q.t}</div>
+          <div class="card-sub">${q.r}</div>
+        </div>
+        ${!q.done && q.t.includes("Điểm danh") ? `<button class="btn btn-sm btn-primary" onclick="checkIn()">Điểm danh</button>` : ""}
+      </div>
+    </div>
+  `).join("");
+}
+
+function checkIn() {
+  const today = new Date().toDateString();
+  if (state.lastCheckin === today) { toast("Hôm nay đã điểm danh rồi!", "error"); return; }
+  const yesterday = new Date(Date.now()-86400000).toDateString();
+  if (state.lastCheckin === yesterday || !state.lastCheckin) state.streak++;
+  else state.streak = 1;
+  state.lastCheckin = today;
+  state.coins += 5;
+  saveState();
+  toast("Điểm danh thành công! +5 🪙 | Streak: " + state.streak);
+  renderHome();
+}
+
+// ==================== STAGES ====================
+function renderStages() {
+  $("#stagesGrid").innerHTML = STAGES.map(s => `
+    <div class="card stage-card ${s.locked?"locked":""}" onclick="${s.locked?"":`openStage(${s.id})`}">
+      ${s.locked?`<div class="lock">🔒</div>`:""}
+      <div class="stage-num">Chặng ${s.id}</div>
+      <div style="font-size:2rem;margin:8px 0;">${s.emoji}</div>
+      <div class="card-title" style="font-size:1rem;">${s.title}</div>
+      <div class="card-sub">Chữ: ${s.letters}</div>
+      ${state.completedStages.includes(s.id)?`<div class="stars">⭐⭐⭐ Hoàn thành</div>`:`<div class="progress-bar" style="margin-top:8px;"><div class="progress-fill" style="width:${s.locked?0:10}%"></div></div>`}
+    </div>
+  `).join("");
+}
+
+function openStage(id) {
+  const s = STAGES.find(x=>x.id===id);
+  if (!s || s.locked) return;
+  const vocabKey = s.topic;
+  const vocabs = VOCAB[vocabKey] || VOCAB.greeting;
+  let html = `
+    <div style="margin-bottom:16px;">
+      <span class="badge badge-new">Chặng ${id}</span>
+      <h3 style="margin:8px 0;">${s.emoji} ${s.title}</h3>
+      <p style="color:var(--text2);font-size:.9rem;">Học chữ cái: <strong>${s.letters}</strong></p>
+    </div>
+    <h4 style="margin-bottom:8px;">📖 Từ vựng cốt lõi</h4>
+    <div class="grid grid-2" style="margin-bottom:16px;">
+      ${vocabs.slice(0,6).map(v=>`
+        <div class="card" style="padding:12px;">
+          <div style="display:flex;gap:8px;align-items:center;">
+            <span style="font-size:1.5rem;">${v.e}</span>
+            <div>
+              <div class="hangul" style="font-weight:600;">${v.h}</div>
+              <div style="color:var(--yuki);font-size:.8rem;">${v.r}</div>
+              <div style="font-size:.85rem;">${v.v}</div>
+            </div>
+            <button class="tts-btn" onclick="speak('${v.h.replace(/'/g,"")}')">🔊</button>
+          </div>
+        </div>
+      `).join("")}
+    </div>
+    <h4 style="margin-bottom:8px;">💬 Hội thoại mẫu</h4>
+    <p style="color:var(--text2);font-size:.85rem;margin-bottom:8px;">Xem đầy đủ tại mục 20 Tình huống</p>
+    <button class="btn btn-primary" onclick="closeModal();navigate('quiz');startQuiz('stage',${id})">📝 Làm bài kiểm tra chặng</button>
+    <button class="btn btn-secondary" style="margin-left:8px;" onclick="completeStage(${id})">✅ Đánh dấu hoàn thành (+20🪙)</button>
+  `;
+  $("#modalTitle").textContent = `Chặng ${id}: ${s.title}`;
+  $("#modalBody").innerHTML = html;
+  $("#modal").classList.add("show");
+}
+
+function completeStage(id) {
+  if (!state.completedStages.includes(id)) {
+    state.completedStages.push(id);
+    state.coins += 20;
+    state.stats.vocabLearned += 8;
+    state.xp += 50;
+    // Unlock next
+    const next = STAGES.find(s=>s.id===id+1);
+    if (next) next.locked = false;
+    saveState();
+    toast(`Hoàn thành Chặng ${id}! +20 🪙`);
+    closeModal();
+    renderStages();
+  }
+}
+
+function closeModal() { $("#modal").classList.remove("show"); }
+
+// ==================== FLASHCARDS ====================
+let flashList = [];
+let flashIdx = 0;
+
+function initFlashcards() {
+  const sel = $("#flashTopic");
+  sel.innerHTML = Object.keys(VOCAB).map(k => `<option value="${k}">${k}</option>`).join("");
+  sel.onchange = () => { loadFlashTopic(sel.value); };
+  loadFlashTopic("greeting");
+}
+
+function loadFlashTopic(topic) {
+  flashList = VOCAB[topic] || [];
+  flashIdx = 0;
+  showFlash();
+}
+
+function showFlash() {
+  if (!flashList.length) return;
+  const v = flashList[flashIdx];
+  $("#flashEmoji").textContent = v.e;
+  $("#flashHangul").textContent = v.h;
+  $("#flashRomaji").textContent = v.r;
+  $("#flashMean").textContent = v.v;
+  $("#flashCulture").textContent = v.c || "";
+  $("#flashCounter").textContent = `${flashIdx+1} / ${flashList.length}`;
+  $("#flashcard").classList.remove("flipped");
+}
+
+function flipFlash() { $("#flashcard").classList.toggle("flipped"); }
+function nextFlash() { flashIdx = (flashIdx+1) % flashList.length; showFlash(); }
+function prevFlash() { flashIdx = (flashIdx-1+flashList.length) % flashList.length; showFlash(); }
+function speakCurrentFlash() { if(flashList[flashIdx]) speak(flashList[flashIdx].h); }
+
+function checkExample() {
+  const input = $("#exampleInput").value.trim();
+  const v = flashList[flashIdx];
+  if (!input) { $("#exampleFeedback").innerHTML = `<div class="quiz-feedback bad">Hãy gõ một câu ví dụ!</div>`; return; }
+  const keywords = [v.h, ...v.h.split(" "), v.r.split("-")[0]];
+  const ok = keywords.some(k => input.includes(k) || input.toLowerCase().includes(k.toLowerCase()));
+  if (ok) {
+    state.coins += 5;
+    state.stats.totalCorrect++;
+    state.stats.totalAnswered++;
+    saveState();
+    $("#exampleFeedback").innerHTML = `<div class="quiz-feedback ok">✅ ${FEEDBACK_OK[Math.floor(Math.random()*FEEDBACK_OK.length)]}<br>Yuki: "Câu ví dụ ổn đấy. +5 🪙"</div>`;
+  } else {
+    state.stats.totalAnswered++;
+    state.reviewQueue.push({type:"example", word:v.h, times:1});
+    saveState();
+    $("#exampleFeedback").innerHTML = `<div class="quiz-feedback bad">❌ ${FEEDBACK_BAD[Math.floor(Math.random()*FEEDBACK_BAD.length)]}<br>Gợi ý: Thử dùng từ <strong>${v.h}</strong> trong câu.</div>`;
+  }
+}
+
+// ==================== SITUATIONS ====================
+function renderSituations() {
+  $("#situationsList").innerHTML = SITUATIONS.map(s => `
+    <div class="card" style="cursor:pointer;" onclick="openSituation(${s.id})">
+      <div style="font-size:2rem;">${s.emoji}</div>
+      <div class="card-title">${s.id}. ${s.title}</div>
+      <div class="card-sub">${s.scene}</div>
+    </div>
+  `).join("");
+}
+
+function openSituation(id) {
+  const s = SITUATIONS.find(x=>x.id===id);
+  if (!s) return;
+  let html = `
+    <p style="color:var(--text2);margin-bottom:12px;"><em>📍 ${s.scene}</em></p>
+    <p style="background:var(--bg2);padding:12px;border-radius:8px;font-size:.85rem;margin-bottom:16px;">🌸 <strong>Bối cảnh văn hóa:</strong> ${s.culture}</p>
+    <table class="dialogue-table">
+      <thead><tr><th>#</th><th>Hangul 🔊</th><th>Romaji</th><th>Tiếng Việt</th></tr></thead>
+      <tbody>
+        ${s.lines.map((l,i)=>`
+          <tr>
+            <td>${i+1}</td>
+            <td><span class="hangul">${l.h}</span> <button class="tts-btn" onclick="speak('${l.h.replace(/'/g,"\\'")}')">🔊</button></td>
+            <td style="color:var(--yuki);font-size:.85rem;">${l.r}</td>
+            <td>${l.v}</td>
+          </tr>
+        `).join("")}
+      </tbody>
+    </table>
+    <div style="margin-top:16px;">
+      <button class="btn btn-primary" onclick="speakAllSituation(${id})">🔊 Nghe toàn bộ (Shadowing)</button>
+    </div>
+  `;
+  $("#modalTitle").textContent = `${s.emoji} ${s.title}`;
+  $("#modalBody").innerHTML = html;
+  $("#modal").classList.add("show");
+}
+
+function speakAllSituation(id) {
+  const s = SITUATIONS.find(x=>x.id===id);
+  if (!s) return;
+  let i = 0;
+  function next() {
+    if (i >= s.lines.length) return;
+    speak(s.lines[i].h);
+    i++;
+    setTimeout(next, 3500);
+  }
+  next();
+}
+
+// ==================== SONGS ====================
+function renderSongs() {
+  $("#songsList").innerHTML = SONGS.map(s => `
+    <div class="card song-card" style="cursor:pointer;" onclick="openSong(${s.id})">
+      <div class="song-cover">${s.emoji}</div>
+      <div>
+        <div class="card-title">${s.title}</div>
+        <div class="card-sub">${s.artist}</div>
+        <button class="btn btn-sm btn-secondary" style="margin-top:8px;">Học lyrics →</button>
+      </div>
+    </div>
+  `).join("");
+}
+
+function openSong(id) {
+  const s = SONGS.find(x=>x.id===id);
+  if (!s) return;
+  let html = `
+    <p style="color:var(--text2);margin-bottom:12px;">${s.artist}</p>
+    <div style="margin-bottom:16px;">
+      <button class="btn btn-sm btn-primary" onclick="speakSong(${id})">🔊 Phát âm từng câu</button>
+    </div>
+    ${s.lines.map((l,i)=>`
+      <div class="lyric-line">
+        <div class="lyric-hangul hangul">${l.h} <button class="tts-btn" onclick="speak('${l.h.replace(/'/g,"\\'")}')">🔊</button></div>
+        <div class="lyric-romaji">${l.r}</div>
+        <div class="lyric-vi">${l.v}</div>
+      </div>
+    `).join("")}
+    <div class="card" style="margin-top:16px;">
+      <div class="card-title">🎤 Shadowing</div>
+      <p class="card-sub">Nghe → Đọc nhại lại ngay. Máy không chấm audio nhưng hãy luyện cơ miệng!</p>
+      <button class="btn btn-secondary" onclick="speakSong(${id})">Bắt đầu Shadowing</button>
+    </div>
+  `;
+  $("#modalTitle").textContent = `${s.emoji} ${s.title}`;
+  $("#modalBody").innerHTML = html;
+  $("#modal").classList.add("show");
+}
+
+function speakSong(id) {
+  const s = SONGS.find(x=>x.id===id);
+  if (!s) return;
+  let i = 0;
+  function next() {
+    if (i >= s.lines.length) return;
+    speak(s.lines[i].h);
+    i++;
+    setTimeout(next, 4000);
+  }
+  next();
+}
+
+// ==================== QUIZ ====================
+let quizQs = [];
+let quizIdx = 0;
+let quizCorrect = 0;
+let quizMode = "";
+
+function startQuiz(mode, stageId) {
+  quizMode = mode;
+  quizQs = [];
+  quizIdx = 0;
+  quizCorrect = 0;
+  $("#quizSetup").style.display = "none";
+  $("#quizResult").style.display = "none";
+  $("#quizArea").style.display = "block";
+
+  // Build questions from vocab + situations
+  const allVocab = Object.values(VOCAB).flat();
+  const pool = allVocab.length ? allVocab : VOCAB.greeting;
+
+  // Multiple choice meaning
+  for (let i=0; i<8; i++) {
+    const v = pool[Math.floor(Math.random()*pool.length)];
+    const wrongs = pool.filter(x=>x.h!==v.h).sort(()=>Math.random()-0.5).slice(0,3);
+    const opts = [v.v, ...wrongs.map(w=>w.v)].sort(()=>Math.random()-0.5);
+    quizQs.push({type:"mc", q:`"${v.h}" (${v.r}) có nghĩa là gì?`, opts, ans:v.v, hangul:v.h});
+  }
+  // Choose Hangul from meaning
+  for (let i=0; i<5; i++) {
+    const v = pool[Math.floor(Math.random()*pool.length)];
+    const wrongs = pool.filter(x=>x.h!==v.h).sort(()=>Math.random()-0.5).slice(0,3);
+    const opts = [v.h, ...wrongs.map(w=>w.h)].sort(()=>Math.random()-0.5);
+    quizQs.push({type:"mc", q:`"${v.v}" viết bằng tiếng Hàn là?`, opts, ans:v.h, hangul:v.h});
+  }
+  // Fill blank / type
+  for (let i=0; i<4; i++) {
+    const v = pool[Math.floor(Math.random()*pool.length)];
+    quizQs.push({type:"type", q:`Gõ từ có nghĩa "${v.v}" (Hangul hoặc Romaji gần đúng):`, ans:v.h, alts:[v.r.replace(/-/g,""), v.r], hangul:v.h});
+  }
+  // SRS items
+  state.reviewQueue.slice(0,3).forEach((r,i) => {
+    quizQs.push({type:"mc", q:`🔁 Ôn lần ${r.times||1}: Từ này nghĩa gì?`, opts:[r.word,"안녕하세요","감사합니다","물"], ans:r.word, hangul:r.word, srs:true});
+  });
+  // Situation based
+  if (SITUATIONS[0]) {
+    quizQs.push({type:"mc", q:`Khi muốn xin thực đơn, bạn nói?`, opts:["메뉴판 좀 주세요.","물 주세요.","안녕하세요!","계산해 주세요."], ans:"메뉴판 좀 주세요.", hangul:"메뉴판 좀 주세요."});
+    quizQs.push({type:"mc", q:`"잘 먹겠습니다" dùng khi nào?`, opts:["Trước khi ăn","Sau khi ăn","Khi chào hỏi","Khi tạm biệt"], ans:"Trước khi ăn", hangul:"잘 먹겠습니다"});
+  }
+
+  quizQs = quizQs.sort(()=>Math.random()-0.5).slice(0, mode==="final"?25:20);
+  showQuestion();
+}
+
+function showQuestion() {
+  if (quizIdx >= quizQs.length) { finishQuiz(); return; }
+  const q = quizQs[quizIdx];
+  $("#quizProgress").textContent = `Câu ${quizIdx+1}/${quizQs.length}`;
+  $("#quizScore").textContent = `Đúng: ${quizCorrect}`;
+  $("#quizBar").style.width = ((quizIdx)/quizQs.length*100) + "%";
+  $("#quizQuestion").innerHTML = (q.srs?`<span class="badge badge-srs">SRS Lần ôn</span> `:"") + q.q +
+    (q.hangul?` <button class="tts-btn" onclick="speak('${q.hangul.replace(/'/g,"")}')">🔊</button>`:"");
+  $("#quizFeedback").innerHTML = "";
+  $("#quizNextWrap").style.display = "none";
+
+  if (q.type === "mc") {
+    $("#quizOptions").style.display = "flex";
+    $("#quizInputArea").style.display = "none";
+    $("#quizOptions").innerHTML = q.opts.map(o =>
+      `<button class="quiz-opt" onclick="answerMC(this, '${o.replace(/'/g,"\\'")}', '${q.ans.replace(/'/g,"\\'")}')">${o}</button>`
+    ).join("");
+  } else {
+    $("#quizOptions").style.display = "none";
+    $("#quizInputArea").style.display = "block";
+    $("#quizInput").value = "";
+    $("#quizInput").focus();
+  }
+}
+
+function answerMC(btn, chosen, correct) {
+  $$(".quiz-opt").forEach(b => b.disabled = true);
+  const ok = chosen === correct;
+  if (ok) {
+    btn.classList.add("correct");
+    quizCorrect++;
+    state.stats.totalCorrect++;
+    $("#quizFeedback").innerHTML = `<div class="quiz-feedback ok">✅ ${FEEDBACK_OK[Math.floor(Math.random()*FEEDBACK_OK.length)]}</div>`;
+  } else {
+    btn.classList.add("wrong");
+    $$(".quiz-opt").forEach(b => { if(b.textContent===correct) b.classList.add("correct"); });
+    $("#quizFeedback").innerHTML = `<div class="quiz-feedback bad">❌ ${FEEDBACK_BAD[Math.floor(Math.random()*FEEDBACK_BAD.length)]}<br>Đáp án: <strong>${correct}</strong></div>`;
+    state.reviewQueue.push({word:correct, times:1, type:"mc"});
+  }
+  state.stats.totalAnswered++;
+  $("#quizNextWrap").style.display = "block";
+}
+
+function submitTyped() {
+  const q = quizQs[quizIdx];
+  const input = $("#quizInput").value.trim().toLowerCase().replace(/[-\s]/g,"");
+  const ans = q.ans.toLowerCase().replace(/[-\s]/g,"");
+  const alts = (q.alts||[]).map(a=>a.toLowerCase().replace(/[-\s]/g,""));
+  const ok = input === ans || alts.some(a=>input.includes(a)||a.includes(input)) || input.includes(ans);
+  if (ok) {
+    quizCorrect++;
+    state.stats.totalCorrect++;
+    $("#quizFeedback").innerHTML = `<div class="quiz-feedback ok">✅ ${FEEDBACK_OK[Math.floor(Math.random()*FEEDBACK_OK.length)]}</div>`;
+  } else {
+    $("#quizFeedback").innerHTML = `<div class="quiz-feedback bad">❌ ${FEEDBACK_BAD[Math.floor(Math.random()*FEEDBACK_BAD.length)]}<br>Đáp án: <strong>${q.ans}</strong></div>`;
+    state.reviewQueue.push({word:q.ans, times:1, type:"type"});
+  }
+  state.stats.totalAnswered++;
+  $("#quizNextWrap").style.display = "block";
+}
+
+function nextQuestion() {
+  quizIdx++;
+  showQuestion();
+}
+
+function finishQuiz() {
+  $("#quizArea").style.display = "none";
+  const pct = Math.round(quizCorrect / quizQs.length * 100);
+  let reward = "";
+  if (pct >= 70 && quizMode === "final") {
+    state.diamonds += 5;
+    reward = `<p style="color:var(--diamond);font-weight:700;">💎 +5 Kim cương (Tổng ôn ≥70%)!</p>`;
+  } else if (pct >= 80) {
+    state.coins += 30;
+    reward = `<p style="color:var(--coin);">🪙 +30 Xu (Xuất sắc!)</p>`;
+  } else if (pct >= 60) {
+    state.coins += 15;
+    reward = `<p style="color:var(--coin);">🪙 +15 Xu</p>`;
+  } else {
+    reward = `<p style="color:var(--text2);">Cố gắng thêm nhé. Làm lại để nhận thưởng!</p>`;
+  }
+  state.xp += quizCorrect * 5;
+  saveState();
+  $("#quizResult").style.display = "block";
+  $("#quizResult").innerHTML = `
+    <div class="card" style="text-align:center;">
+      <div style="font-size:3rem;">${pct>=70?"🎉":"💪"}</div>
+      <h2>Kết quả: ${quizCorrect}/${quizQs.length} (${pct}%)</h2>
+      ${reward}
+      <p style="color:var(--text2);margin:12px 0;">👓 Yuki: "${pct>=80?"Không tệ. Tiếp tục phát huy.":pct>=60?"Tạm được. Ôn lại SRS nhé.":"Học lại đi, đừng để tôi phải cà khịa nhiều."}"</p>
+      <button class="btn btn-primary" onclick="resetQuiz()">Làm lại / Chọn chế độ khác</button>
+    </div>
+  `;
+}
+
+function resetQuiz() {
+  $("#quizResult").style.display = "none";
+  $("#quizSetup").style.display = "block";
+}
+
+// ==================== SHOP ====================
+let shopCat = "all";
+function renderShop() {
+  $$(".shop-tab").forEach(t => {
+    t.classList.toggle("active", t.dataset.cat === shopCat);
+    t.onclick = () => { shopCat = t.dataset.cat; renderShop(); };
+  });
+  const items = shopCat==="all" ? SHOP_ITEMS : SHOP_ITEMS.filter(i=>i.cat===shopCat);
+  $("#shopGrid").innerHTML = items.map(item => {
+    const owned = state.ownedItems.includes(item.id);
+    return `
+      <div class="card shop-item ${owned?"owned":""}">
+        <div class="item-icon">${item.icon}</div>
+        <div class="card-title" style="font-size:.95rem;">${item.name}</div>
+        <div class="card-sub" style="font-size:.75rem;">${item.desc}</div>
+        <div class="price">${item.price} ${item.currency==="coin"?"🪙":"💎"}</div>
+        <button class="btn btn-sm ${owned?"btn-secondary":"btn-primary"}" ${owned?"disabled":""} onclick="buyItem('${item.id}')">${owned?"Đã sở hữu":"Mua"}</button>
+      </div>
+    `;
+  }).join("");
+}
+
+function buyItem(id) {
+  const item = SHOP_ITEMS.find(i=>i.id===id);
+  if (!item || state.ownedItems.includes(id)) return;
+  if (item.currency==="coin" && state.coins < item.price) { toast("Không đủ Xu!", "error"); return; }
+  if (item.currency==="diamond" && state.diamonds < item.price) { toast("Không đủ Kim cương!", "error"); return; }
+  if (item.currency==="coin") state.coins -= item.price;
+  else state.diamonds -= item.price;
+  state.ownedItems.push(id);
+  if (item.cat==="theme") {
+    const themeMap = {theme_sakura:"sakura", theme_matcha:"matcha", theme_ocean:"ocean", theme_space:"space"};
+    if (themeMap[id]) {
+      document.documentElement.setAttribute("data-theme", themeMap[id]);
+      state.currentTheme = themeMap[id];
+      $("#themeSelect").value = themeMap[id];
+    }
+  }
+  saveState();
+  toast(`Đã mua ${item.name}!`);
+  renderShop();
+}
+
+// ==================== PROFILE ====================
+function renderProfile() {
+  $("#profStreak").textContent = state.streak;
+  $("#profLevel").textContent = Math.floor(state.xp/100)+1;
+  $("#profXP").style.width = (state.xp % 100) + "%";
+  const achs = [
+    {icon:"🔥", name:"Streak 7 ngày", done:state.streak>=7},
+    {icon:"📚", name:"Hoàn thành 5 chặng", done:state.completedStages.length>=5},
+    {icon:"💎", name:"Sở hữu Kim cương", done:state.diamonds>0},
+    {icon:"🛒", name:"Mua món đầu tiên", done:state.ownedItems.length>0},
+    {icon:"🎵", name:"Học 1 bài hát", done:true},
+    {icon:"🏆", name:"Quiz 100%", done:false},
+  ];
+  $("#achievements").innerHTML = achs.map(a=>`
+    <div class="card" style="text-align:center;opacity:${a.done?1:0.5}">
+      <div style="font-size:2rem;">${a.icon}</div>
+      <div class="card-title" style="font-size:.9rem;">${a.name}</div>
+      <div class="card-sub">${a.done?"✅ Đạt được":"🔒 Chưa mở"}</div>
+    </div>
+  `).join("");
+  $("#inventory").innerHTML = state.ownedItems.length ? state.ownedItems.map(id=>{
+    const item = SHOP_ITEMS.find(i=>i.id===id);
+    return item?`<div class="card shop-item"><div class="item-icon">${item.icon}</div><div class="card-title" style="font-size:.85rem;">${item.name}</div></div>`:"";
+  }).join("") : `<p style="color:var(--text2);">Chưa có vật phẩm. Vào Shop mua nào!</p>`;
+}
+
+// ==================== YUKI ====================
+const YUKI_LINES = [
+  "Đừng bỏ cuộc giữa chừng. Tôi đang theo dõi Streak đấy.",
+  "Làm đúng thì có Xu. Làm sai thì... chuẩn bị nghe cà khịa.",
+  "Học qua bài hát cũng được, miễn là đừng ngủ quên.",
+  "Flashcard mỗi ngày 10 thẻ là tối thiểu nhé.",
+  "Kim cương không tự rơi vào túi đâu. Làm tổng ôn đi!",
+  "Cậu tiến bộ đấy. Nhưng đừng tự mãn.",
+  "Tôi là CEO giám sát lộ trình. Không phải bạn tâm sự đâu.",
+];
+function yukiSpeak() {
+  const line = YUKI_LINES[Math.floor(Math.random()*YUKI_LINES.length)];
+  $("#yukiSpeech").textContent = line;
+  $("#yukiSpeech").style.display = "block";
+  setTimeout(()=>$("#yukiSpeech").style.display="none", 4000);
+  // Optional: speak Vietnamese
+  // speak(line, "vi-VN");
+}
+
+// ==================== INIT ====================
+document.addEventListener("DOMContentLoaded", () => {
+  loadState();
+  updateUI();
+  renderHome();
+
+  // Nav
+  $$(".nav-item").forEach(n => n.addEventListener("click", () => navigate(n.dataset.page)));
+  $("#menuToggle").addEventListener("click", () => $("#sidebar").classList.toggle("open"));
+
+  // Theme
+  $("#themeSelect").value = state.currentTheme || "default";
+  if (state.currentTheme && state.currentTheme !== "default") {
+    document.documentElement.setAttribute("data-theme", state.currentTheme);
+  }
+  $("#themeSelect").addEventListener("change", e => {
+    const t = e.target.value;
+    if (t==="default") document.documentElement.removeAttribute("data-theme");
+    else document.documentElement.setAttribute("data-theme", t);
+    state.currentTheme = t;
+    saveState();
+  });
+
+  // Close modal on overlay click
+  $("#modal").addEventListener("click", e => { if(e.target===e.currentTarget) closeModal(); });
+});
+</script>
+</body>
+</html>
+Nhi em đích bự
